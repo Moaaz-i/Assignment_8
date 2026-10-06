@@ -1,0 +1,289 @@
+{
+  "info": {
+    "_postman_id": "8f3b1c2a-4d5e-4f6a-8b9c-0d1e2f3a4b5c",
+    "name": "Assignment 8 - Sticky Notes API",
+    "description": "Sticky Notes API (Users + Notes) - Express.js & Mongoose.\n\nWorkflow:\n1) Sign Up (or Login) to get the user id and token.\n2) Save the user id in the collection variable {{userId}} and the note id in {{noteId}}.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "userId", "value": "REPLACE_WITH_USER_ID" },
+    { "key": "noteId", "value": "REPLACE_WITH_NOTE_ID" },
+    { "key": "token", "value": "REPLACE_WITH_JWT_TOKEN" }
+  ],
+  "item": [
+    {
+      "name": "User APIs",
+      "item": [
+        {
+          "name": "Sign Up New User",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/users/signup", "host": ["{{baseUrl}}"], "path": ["users", "signup"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Alice\",\n  \"email\": \"alice@test.com\",\n  \"password\": \"secret1\",\n  \"phone\": \"01001112233\",\n  \"age\": 25\n}"
+            },
+            "description": "Creates a new user. Email must be unique. Password is hashed."
+          }
+        },
+        {
+          "name": "Login User",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/users/login", "host": ["{{baseUrl}}"], "path": ["users", "login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"alice@test.com\",\n  \"password\": \"secret1\"\n}"
+            },
+            "description": "Authenticates the user with email + password and returns a JWT."
+          }
+        },
+        {
+          "name": "Update Logged-In User",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}"]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Alice Updated\",\n  \"age\": 27\n}"
+            },
+            "description": "Updates the logged-in user's data (password can NOT be updated). A new email is checked for uniqueness. The user id is also accepted as ?id=."
+          }
+        },
+        {
+          "name": "Delete Logged-In User",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/users?id={{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"],
+              "query": [{ "key": "id", "value": "{{userId}}" }]
+            },
+            "description": "Deletes the logged-in user (id comes from the query params)."
+          }
+        },
+        {
+          "name": "Get Logged-In User Data",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/users?id={{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"],
+              "query": [{ "key": "id", "value": "{{userId}}" }]
+            },
+            "description": "Returns the logged-in user's data by his ID (id comes from the query params)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Note APIs",
+      "item": [
+        {
+          "name": "Create Single Note",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notes?id={{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["notes"],
+              "query": [{ "key": "id", "value": "{{userId}}" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Workout Plan\",\n  \"content\": \"30 minutes cardio\"\n}"
+            },
+            "description": "Creates a note for the logged-in user. The title can not be entirely uppercase."
+          }
+        },
+        {
+          "name": "Update Note By Id",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notes/{{noteId}}?id={{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["notes", "{{noteId}}"],
+              "query": [{ "key": "id", "value": "{{userId}}" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Workout Plan v2\",\n  \"content\": \"45 minutes cardio\"\n}"
+            },
+            "description": "Updates a single note and returns the updated note. Owner only."
+          }
+        },
+        {
+          "name": "Replace Entire Note",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notes/replace/{{noteId}}?id={{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["notes", "replace", "{{noteId}}"],
+              "query": [{ "key": "id", "value": "{{userId}}" }]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Replaced Note\",\n  \"content\": \"The whole document was replaced\"\n}"
+            },
+            "description": "Replaces the entire note document with the body data. Owner only."
+          }
+        },
+        {
+          "name": "Update Title Of All My Notes",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notes/all?id={{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["notes", "all"],
+              "query": [{ "key": "id", "value": "{{userId}}" }]
+            },
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"My Daily Note\"\n}" },
+            "description": "Updates the title of every note created by the logged-in user."
+          }
+        },
+        {
+          "name": "Delete Note By Id",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/notes/{{noteId}}?id={{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["notes", "{{noteId}}"],
+              "query": [{ "key": "id", "value": "{{userId}}" }]
+            },
+            "description": "Deletes a single note and returns the deleted note. Owner only."
+          }
+        },
+        {
+          "name": "Get Paginated Sorted Notes",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/notes/paginate-sort?id={{userId}}&page=2&limit=3",
+              "host": ["{{baseUrl}}"],
+              "path": ["notes", "paginate-sort"],
+              "query": [
+                { "key": "id", "value": "{{userId}}" },
+                { "key": "page", "value": "2" },
+                { "key": "limit", "value": "3" }
+              ]
+            },
+            "description": "Paginated list of the logged-in user's notes, sorted by createdAt descending."
+          }
+        },
+        {
+          "name": "Get Note By Id",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/notes/{{noteId}}?id={{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["notes", "{{noteId}}"],
+              "query": [{ "key": "id", "value": "{{userId}}" }]
+            },
+            "description": "Gets a note by its id. Owner only."
+          }
+        },
+        {
+          "name": "Get Note By Content",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/notes/note-by-content?id={{userId}}&content=Workout Plan",
+              "host": ["{{baseUrl}}"],
+              "path": ["notes", "note-by-content"],
+              "query": [
+                { "key": "id", "value": "{{userId}}" },
+                { "key": "content", "value": "Workout Plan" }
+              ]
+            },
+            "description": "Gets a note of the logged-in user by its content."
+          }
+        },
+        {
+          "name": "Get Notes With User Info",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/notes/note-with-user?id={{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["notes", "note-with-user"],
+              "query": [{ "key": "id", "value": "{{userId}}" }]
+            },
+            "description": "All notes of the logged-in user with user info: title/userId/createdAt from the note and email from the user."
+          }
+        },
+        {
+          "name": "Aggregate Notes With User And Search By Title",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/notes/aggregate?id={{userId}}&title=Code Review Notes",
+              "host": ["{{baseUrl}}"],
+              "path": ["notes", "aggregate"],
+              "query": [
+                { "key": "id", "value": "{{userId}}" },
+                { "key": "title", "value": "Code Review Notes" }
+              ]
+            },
+            "description": "Aggregation: all notes of the logged-in user with the user's name and email, searchable by title."
+          }
+        },
+        {
+          "name": "Delete All My Notes",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/notes?id={{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["notes"],
+              "query": [{ "key": "id", "value": "{{userId}}" }]
+            },
+            "description": "Deletes every note of the logged-in user."
+          }
+        }
+      ]
+    }
+  ]
+}
